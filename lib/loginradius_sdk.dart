@@ -17,12 +17,8 @@ class LoginRadiusSDK {
   static final LoginRadiusSDK instance = LoginRadiusSDK._privateConstructor();
 
   late String _apiKey;
-  late String _appName;
-  String? _sott;
-  String? _resetPasswordUrl;
+  late final String? _sott;
   String? _verificationUrl;
-
-  late bool _isInitialized = false;
 
   /// Initialize the SDK with your API Key and Secret.
   /// [apiKey] - LoginRadius API Key
@@ -37,14 +33,12 @@ class LoginRadiusSDK {
     String? verificationUrl,
   }) {
     _apiKey = apiKey;
-    _appName = appName;
     _sott = sott;
-    _resetPasswordUrl = resetPasswordUrl;
     _verificationUrl = verificationUrl;
     debugPrint("Initializing LoginRadius SDK");
     debugPrint("API Key: $apiKey");
     debugPrint("APP Name: $appName");
-    _isInitialized = true;
+    debugPrint("SOTT: $sott");
     debugPrint("Initialization complete");
   }
 
@@ -64,6 +58,7 @@ class LoginRadiusSDK {
     await _apiClient.post(
       '/identity/v2/auth/login',
       data: data,
+      sott: _sott,
       params: {
         'apikey': _apiKey,
         'verificationurl': _verificationUrl,
@@ -92,6 +87,7 @@ class LoginRadiusSDK {
     debugPrint("Register by Email");
     await _apiClient.post(
       '/identity/v2/auth/register',
+      sott: _sott,
       data: data,
       params: {
         'apikey': _apiKey,
@@ -99,6 +95,46 @@ class LoginRadiusSDK {
         'emailtemplate': emailTemplate,
         'welcomeemailtemplate': welcomeEmailTemplate,
       },
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// Retrieves a copy of the user data based on the access_token.
+  /// [onSuccess] - Callback function on success
+  /// [onError] - Callback function on error
+  /// [accessToken] - Access Token of the User
+
+  Future<dynamic> getUserProfileData({
+    required String accessToken,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+  }) async {
+    debugPrint("Get User Profile Data");
+    await _apiClient.get(
+      '/identity/v2/auth/account',
+      accessToken: accessToken,
+      params: {'apikey': _apiKey},
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// Invalidates a current Access Token.
+  /// [onSuccess] - Callback function on success
+  /// [onError] - Callback function on error
+  /// [accessToken] - Access Token of the User
+
+  Future<dynamic> invalidateAccessToken({
+    required String accessToken,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+  }) async {
+    debugPrint("Invalidate Access Token");
+    await _apiClient.get(
+      '/identity/v2/auth/access_token/InValidate',
+      accessToken: accessToken,
+      params: {'apikey': _apiKey, 'preventRefresh ': true},
       onSuccess: (data) => onSuccess(data),
       onError: (error) => onError(error),
     );
@@ -115,12 +151,19 @@ class ApiClient {
 
   Future<dynamic> get(
     String url, {
+    String? sott,
+    String? accessToken,
     required Map<String, dynamic>? params,
     required Function? Function(dynamic) onSuccess,
     required Function? Function(dynamic) onError,
   }) async {
     try {
-      Response response = await _dio.post(url, queryParameters: params);
+      Response response = await _dio.get(url,
+          queryParameters: params,
+          options: Options(headers: {
+            'X-LoginRadius-Sott': sott,
+            'Authorization': 'Bearer $accessToken',
+          }));
       debugPrint("Response: ${response.data}");
       onSuccess(response.data);
       return response.data;
@@ -133,14 +176,21 @@ class ApiClient {
 
   Future<dynamic> post(
     String url, {
+    String? sott,
+    String? accessToken,
     required Map<String, dynamic>? data,
     required Map<String, dynamic>? params,
     required Function? Function(dynamic) onSuccess,
     required Function? Function(LRError) onError,
   }) async {
     try {
-      Response response =
-          await _dio.post(url, data: data, queryParameters: params);
+      Response response = await _dio.post(url,
+          data: data,
+          queryParameters: params,
+          options: Options(headers: {
+            'X-LoginRadius-Sott': sott,
+            'Authorization': 'Bearer<ACCESS_TOKEN> $accessToken',
+          }));
       debugPrint("Response: ${response.data}");
       onSuccess(response.data);
       return response.data;
@@ -153,14 +203,21 @@ class ApiClient {
 
   Future<dynamic> put(
     String url, {
+    String? sott,
+    String? accessToken,
     required Map<String, dynamic>? data,
     required Map<String, dynamic>? params,
     required Function? Function(dynamic) onSuccess,
     required Function? Function(dynamic) onError,
   }) async {
     try {
-      Response response =
-          await _dio.put(url, data: data, queryParameters: params);
+      Response response = await _dio.put(url,
+          data: data,
+          queryParameters: params,
+          options: Options(headers: {
+            'X-LoginRadius-Sott': sott,
+            'Authorization': 'Bearer<ACCESS_TOKEN> $accessToken',
+          }));
       debugPrint("Response: ${response.data}");
       onSuccess(response.data);
       return response.data;
@@ -173,14 +230,21 @@ class ApiClient {
 
   Future<dynamic> delete(
     String url, {
+    String? sott,
+    String? accessToken,
     required Map<String, dynamic>? data,
     required Map<String, dynamic>? params,
     required Function? Function(dynamic) onSuccess,
     required Function? Function(dynamic) onError,
   }) async {
     try {
-      Response response =
-          await _dio.delete(url, data: data, queryParameters: params);
+      Response response = await _dio.delete(url,
+          data: data,
+          queryParameters: params,
+          options: Options(headers: {
+            'X-LoginRadius-Sott': sott,
+            'Authorization': 'Bearer<ACCESS_TOKEN> $accessToken',
+          }));
       debugPrint("Response: ${response.data}");
       onSuccess(response.data);
       return response.data;
