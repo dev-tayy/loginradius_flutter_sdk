@@ -49,17 +49,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
     late String accessToken;
 
-    await _loginRadius.loginByEmail(
+    await _loginRadius.signInWithEmailAndPassword(
         data: {
           'email': 'email@email.com',
           'password': 'P@ssword12345',
         },
         onSuccess: (data) {
-          print('LOGIN BY EMAIL $data');
+          debugPrint('LOGIN BY EMAIL $data');
           accessToken = data['access_token'];
         },
         onError: (error) {
-          print(error.description);
+          debugPrint(error.description);
         });
 
     Future.delayed(const Duration(seconds: 3), () {});
@@ -73,10 +73,10 @@ class _MyHomePageState extends State<MyHomePage> {
     //       'password': 'P@ssword12345',
     //     },
     //     onSuccess: (data) {
-    //       print(data);
+    //       debugPrint(data);
     //     },
     //     onError: (error) {
-    //       print(error.description);
+    //       debugPrint(error.description);
     //     });
 
     //GET USER PROFILE DETAILS
@@ -84,10 +84,10 @@ class _MyHomePageState extends State<MyHomePage> {
     _loginRadius.getUserProfileData(
         accessToken: accessToken,
         onSuccess: (data) {
-          print('GET USER PROFILE DATA $data');
+          debugPrint('GET USER PROFILE DATA $data');
         },
         onError: (error) {
-          print(error);
+          debugPrint(error.description);
         });
 
     Future.delayed(const Duration(seconds: 3), () {});
@@ -96,10 +96,10 @@ class _MyHomePageState extends State<MyHomePage> {
     _loginRadius.invalidateAccessToken(
         accessToken: accessToken,
         onSuccess: (data) {
-          print('INVALIDATE ACCESS TOKEN $data');
+          debugPrint('INVALIDATE ACCESS TOKEN $data');
         },
         onError: (error) {
-          print(error);
+          debugPrint(error.description);
         });
   }
 
