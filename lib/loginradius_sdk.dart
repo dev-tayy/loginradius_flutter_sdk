@@ -1,7 +1,7 @@
 library loginradius_sdk;
 
-import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'src/core/api_client.dart';
 import 'src/models/error.dart';
 
 export 'loginradius_sdk.dart';
@@ -21,13 +21,17 @@ class LoginRadiusSDK {
   String? _verificationUrl;
   String? _resetPasswordUrl;
 
-  /// Initialize the SDK with your API Key and Secret.
+  /// Initialize the SDK with your API Key, AppName, SOTT, VerificationURL, ResetPasswordURL.
   ///
   /// [apiKey] - LoginRadius API Key
   ///
-  /// [apiSecret] - LoginRadius API Secret
+  /// [appName] - LoginRadius App Name
   ///
-  /// [debug] - Enable/Disable debug mode
+  /// [sott] - LoginRadius SOTT
+  ///
+  /// [verificationUrl] - LoginRadius Verification URL
+  ///
+  /// [resetPasswordUrl] - LoginRadius Reset Password URL
   ///
 
   void init({
@@ -818,7 +822,7 @@ class LoginRadiusSDK {
   /// [onSuccess] - Callback function on success
   ///
   /// [onError] - Callback function on error
-  //TODO: Issue with the API, requesting for resettoken when it isn't specified in the API.
+  //TODO: Issue with the API endpoint, requesting for resettoken when it isn't specified in the body of the endpoint.
   Future<dynamic> resetPasswordByOTP({
     required String? email,
     required String? otp,
@@ -1094,119 +1098,99 @@ class LoginRadiusSDK {
       onError: (error) => onError(error),
     );
   }
-}
 
-class ApiClient {
-  static const String _baseUrl = 'https://api.loginradius.com';
-  final Dio _dio;
+  //<--DELETE REQUESTS-->
 
-  ApiClient({
-    Dio? dio, // if null, a new instance of Dio will be created
-  }) : _dio = dio ?? Dio(BaseOptions(baseUrl: _baseUrl));
+  /// This method will send a confirmation email for account deletion to the customer's email when passed the customer's access token.
+  ///
+  /// [accessToken] - Access Token of the User
+  ///
+  /// [deleteUrl] - Url of the site
+  ///
+  /// [emailTemplate] - Email template name
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+  ///
 
-  Future<dynamic> get(
-    String url, {
-    String? sott,
-    String? accessToken,
-    required Map<String, dynamic>? params,
+  Future<dynamic> deleteAccountWithEmailConfirmation({
+    required String accessToken,
     required Function? Function(dynamic) onSuccess,
-    required Function? Function(dynamic) onError,
+    required Function? Function(LRError) onError,
+    String? deleteUrl,
+    String? emailTemplate,
   }) async {
-    try {
-      Response response = await _dio.get(url,
-          queryParameters: params,
-          options: Options(headers: {
-            'X-LoginRadius-Sott': sott,
-            'Authorization': 'Bearer $accessToken',
-          }));
-      debugPrint("Response: ${response.data}");
-      onSuccess(response.data);
-      return response.data;
-    } on DioError catch (e) {
-      debugPrint("DioError: ${e.response!.data}");
-      onError(LRError.fromJson(e.response!.data));
-      return e.response!.data;
-    }
+    debugPrint("Auth Delete Account with Email Confirmation");
+    await _apiClient.delete(
+      '/identity/v2/auth/account',
+      accessToken: accessToken,
+      params: {
+        'apikey': _apiKey,
+        'deleteurl': deleteUrl,
+        'emailtemplate': emailTemplate
+      },
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
   }
 
-  Future<dynamic> post(
-    String url, {
-    String? sott,
-    String? accessToken,
-    required Map<String, dynamic>? data,
-    required Map<String, dynamic>? params,
+  /// This method is used to remove additional emails from a user's account.
+  ///
+  /// [accessToken] - Access Token of the User
+  ///
+  /// [email] - Email of the user
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+  ///
+
+  Future<dynamic> removeEmail({
+    required String? email,
+    required String? accessToken,
     required Function? Function(dynamic) onSuccess,
     required Function? Function(LRError) onError,
   }) async {
-    try {
-      Response response = await _dio.post(url,
-          data: data,
-          queryParameters: params,
-          options: Options(headers: {
-            'X-LoginRadius-Sott': sott,
-            'Authorization': 'Bearer<ACCESS_TOKEN> $accessToken',
-          }));
-      debugPrint("Response: ${response.data}");
-      onSuccess(response.data);
-      return response.data;
-    } on DioError catch (e) {
-      debugPrint("DioError: ${e.response!.data}");
-      onError(LRError.fromJson(e.response!.data));
-      return e.response!.data;
-    }
+    debugPrint("Auth Remove Email");
+    await _apiClient.delete(
+      '/identity/v2/auth/email',
+      accessToken: accessToken,
+      data: {'email': email},
+      params: {'apikey': _apiKey},
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
   }
 
-  Future<dynamic> put(
-    String url, {
-    String? sott,
-    String? accessToken,
-    required Map<String, dynamic>? data,
-    required Map<String, dynamic>? params,
-    required Function? Function(dynamic) onSuccess,
-    required Function? Function(dynamic) onError,
-  }) async {
-    try {
-      Response response = await _dio.put(url,
-          data: data,
-          queryParameters: params,
-          options: Options(headers: {
-            'X-LoginRadius-Sott': sott,
-            'Authorization': 'Bearer<ACCESS_TOKEN> $accessToken',
-          }));
-      debugPrint("Response: ${response.data}");
-      onSuccess(response.data);
-      return response.data;
-    } on DioError catch (e) {
-      debugPrint("DioError: ${e.response!.data}");
-      onError(LRError.fromJson(e.response!.data));
-      return e.response!.data;
-    }
-  }
+  /// This method is used to unlink up a social provider account with the specified account based on the access token and the social providers user access token. The unlinked account will automatically get removed from your database.
+  ///
+  /// [accessToken] - Access Token of the User
+  ///
+  /// [provider] - Name of the provider
+  ///
+  /// [providerId] - Unique ID of the linked account
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+  ///
 
-  Future<dynamic> delete(
-    String url, {
-    String? sott,
-    String? accessToken,
-    required Map<String, dynamic>? data,
-    required Map<String, dynamic>? params,
+  Future<dynamic> unlinkSocialIdentities({
+    required String? provider,
+    required String? providerId,
+    required String? accessToken,
     required Function? Function(dynamic) onSuccess,
-    required Function? Function(dynamic) onError,
+    required Function? Function(LRError) onError,
   }) async {
-    try {
-      Response response = await _dio.delete(url,
-          data: data,
-          queryParameters: params,
-          options: Options(headers: {
-            'X-LoginRadius-Sott': sott,
-            'Authorization': 'Bearer<ACCESS_TOKEN> $accessToken',
-          }));
-      debugPrint("Response: ${response.data}");
-      onSuccess(response.data);
-      return response.data;
-    } on DioError catch (e) {
-      debugPrint("DioError: ${e.response!.data}");
-      onError(LRError.fromJson(e.response!.data));
-      return e.response!.data;
-    }
+    debugPrint("Auth Unlink Social Identities");
+    await _apiClient.delete(
+      '/identity/v2/auth/socialidentity',
+      accessToken: accessToken,
+      data: {'provider': provider, 'providerid': providerId},
+      params: {'apikey': _apiKey},
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
   }
 }
