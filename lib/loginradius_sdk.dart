@@ -22,9 +22,13 @@ class LoginRadiusSDK {
   String? _resetPasswordUrl;
 
   /// Initialize the SDK with your API Key and Secret.
+  ///
   /// [apiKey] - LoginRadius API Key
+  ///
   /// [apiSecret] - LoginRadius API Secret
+  ///
   /// [debug] - Enable/Disable debug mode
+  ///
 
   void init({
     required String apiKey,
@@ -49,10 +53,15 @@ class LoginRadiusSDK {
   //<--POST REQUESTS-->
 
   /// Login by Email and Password
+  ///
   /// [data] - Email and Password of the User required, Valid JSON object of Unique Security Question ID and Answer of set Security Question
+  ///
   /// [emailTemplate] - Email template name (Optional)
+  ///
   /// [loginUrl] - URL where the user is logging from (Optional)
+  ///
   /// [g-recaptcha-response] - Google reCAPTCHA response (Optional)
+  ///
 
   Future<dynamic> signInWithEmailAndPassword({
     required Map<String, dynamic> data,
@@ -80,10 +89,15 @@ class LoginRadiusSDK {
   }
 
   /// Login by Username and Password
+  ///
   /// [data] - Username and Password of the User required, Valid JSON object of Unique Security Question ID and Answer of set Security Question
+  ///
   /// [emailTemplate] - Email template name (Optional)
+  ///
   /// [loginUrl] - URL where the user is logging from (Optional)
+  ///
   /// [g-recaptcha-response] - Google reCAPTCHA response (Optional)
+  ///
 
   Future<dynamic> signInWithUsernameAndPassword({
     required Map<String, dynamic> data,
@@ -110,10 +124,13 @@ class LoginRadiusSDK {
   }
 
   /// Register by Email and Password
-  /// [email] - Email of the user
-  /// [password] - Password of the user
+  ///
+  /// [data] - User data required
+  ///
   /// [onSuccess] - Callback function on success
+  ///
   /// [onError] - Callback function on error
+  ///
 
   Future<dynamic> signUpWithEmailAndPassword({
     required Map<String, dynamic> data,
@@ -140,12 +157,17 @@ class LoginRadiusSDK {
   }
 
   /// This method is used to send the reset password url to a specified account. Note: If you have the UserName workflow enabled, you may replace the 'email' parameter with 'username'
+  ///
   /// [onSuccess] - Callback function on success
+  ///
   /// [onError] - Callback function on error
+  ///
   /// [data] - Note: If you have the UserName workflow enabled, you may replace the 'email' parameter with 'username'
+  ///
   /// [emailTemplate] - Email template name
+  ///
 
-  Future<dynamic> authForgotPassword({
+  Future<dynamic> forgotPassword({
     required Map<String, dynamic> data,
     required Function? Function(dynamic) onSuccess,
     required Function? Function(LRError) onError,
@@ -158,7 +180,7 @@ class LoginRadiusSDK {
       params: {
         'apikey': _apiKey,
         'resetpasswordurl': _resetPasswordUrl,
-        'emailTemplate': emailTemplate,
+        'emailtemplate': emailTemplate,
       },
       onSuccess: (data) => onSuccess(data),
       onError: (error) => onError(error),
@@ -166,14 +188,20 @@ class LoginRadiusSDK {
   }
 
   /// This method is used to add additional emails to a user's account.
+  ///
   /// [onSuccess] - Callback function on success
+  ///
   /// [onError] - Callback function on error
-  /// [data] - Map of email and email type
+  ///
+  /// [data] - Map of new email and email type
+  ///
   /// [emailTemplate] - Email template name
+  ///
   /// [emailType] - Email type
+  ///
   /// [accessToken] - Access Token of the User
 
-  Future<dynamic> authAddEmail({
+  Future<dynamic> addEmail({
     required String accessToken,
     required String newEmail,
     required String newEmailType,
@@ -189,8 +217,80 @@ class LoginRadiusSDK {
       params: {
         'apikey': _apiKey,
         'verificationurl': _verificationUrl,
-        'emailTemplate': emailTemplate,
+        'emailtemplate': emailTemplate,
       },
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// This method  creates a user in the database using ReCaptcha.
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+  ///
+  /// [data] - User data required
+  ///
+  /// [emailTemplate] - Email template name
+  ///
+  /// [welcomeEmailTemplate] - Welcome email template name
+  ///
+  /// [smsTemplate] - SMS template name
+  ///
+  /// [options] - PreventVerificationEmail (Specifying this value prevents the verification email from being sent. Only applicable if you have the optional email verification flow)
+
+  Future<dynamic> signUpByReCaptcha({
+    required Map<String, dynamic> data,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+    String? emailTemplate,
+    String? welcomeEmailTemplate,
+    String? smsTemplate,
+    String? options,
+  }) async {
+    debugPrint("Auth User Registration by ReCaptcha");
+    await _apiClient.post(
+      '/identity/v2/auth/register/captcha',
+      data: data,
+      params: {
+        'apikey': _apiKey,
+        'verificationurl': _verificationUrl,
+        'emailtemplate': emailTemplate,
+        'smstemplate': smsTemplate,
+        'welcomeemailtemplate': welcomeEmailTemplate,
+        'options': options,
+      },
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// This method  is used to link up a social provider account with an existing LoginRadius account on the basis of access token and the social providers user access token.
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+  ///
+  /// [candidateToken] - Access token of the account to be linked
+  ///
+  /// [accessToken] - Access Token of the User
+
+  Future<dynamic> linkSocialIdentity({
+    required String? candidateToken,
+    required String? accessToken,
+    required Map<String, dynamic>? data,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+  }) async {
+    debugPrint("Auth Link Social Identity");
+    await _apiClient.post(
+      '/identity/v2/auth/socialidentity',
+      data: {
+        'candidatetoken': candidateToken,
+      },
+      accessToken: accessToken,
+      params: {'apikey': _apiKey},
       onSuccess: (data) => onSuccess(data),
       onError: (error) => onError(error),
     );
@@ -199,9 +299,13 @@ class LoginRadiusSDK {
   //<--GET REQUESTS-->
 
   /// Retrieves a copy of the user data based on the access_token.
+  ///
   /// [onSuccess] - Callback function on success
+  ///
   /// [onError] - Callback function on error
+  ///
   /// [accessToken] - Access Token of the User
+  ///
 
   Future<dynamic> getUserProfileData({
     required String accessToken,
@@ -219,9 +323,13 @@ class LoginRadiusSDK {
   }
 
   /// This method validates access token, if valid then returns a response with its expiry otherwise error.
+  ///
   /// [onSuccess] - Callback function on success
+  ///
   /// [onError] - Callback function on error
+  ///
   /// [accessToken] - Access Token of the User
+  ///
 
   Future<dynamic> validateAccessToken({
     required String accessToken,
@@ -239,11 +347,15 @@ class LoginRadiusSDK {
   }
 
   /// This method is used to obtain information on the provided access_token.
+  ///
   /// [onSuccess] - Callback function on success
+  ///
   /// [onError] - Callback function on error
+  ///
   /// [accessToken] - Access Token of the User
+  ///
 
-  Future<dynamic> accessTokenInfo({
+  Future<dynamic> getAccessTokenInfo({
     required String accessToken,
     required Function? Function(dynamic) onSuccess,
     required Function? Function(LRError) onError,
@@ -258,11 +370,16 @@ class LoginRadiusSDK {
     );
   }
 
-  /// Invalidates a current Access Token.
+  /// This method invalidates a current Access Token.
+  ///
   /// [onSuccess] - Callback function on success
+  ///
   /// [onError] - Callback function on error
+  ///
   /// [accessToken] - Access Token of the User
+  ///
   /// [preventRefresh] - Prevent refresh of access token (Optional)
+  ///
 
   Future<dynamic> invalidateAccessToken({
     required String accessToken,
@@ -282,10 +399,15 @@ class LoginRadiusSDK {
 
   /// This method is used to verify the email of the user. Note: This method will only return the full profile if you have 'Enable automatic login after email verification' enabled in your LoginRadius Admin Console's Js Widget settings under 'Deployment'.
   /// [onSuccess] - Callback function on success.
+  ///
   /// [onError] - Callback function on error.
+  ///
   /// [verificationToken] - Verification token received in the email.
+  ///
   /// [welcomeEmailTemplate] - Email template name (Optional)
+  ///
   /// [url] - Mention URL to log the main URL(Domain name) in Database. (Optional)
+  ///
 
   Future<dynamic> verifyEmail({
     required String verificationToken,
@@ -309,16 +431,20 @@ class LoginRadiusSDK {
   }
 
   /// This method is used to delete an account by passing it a delete token.
+  ///
   /// [onSuccess] - Callback function on success.
+  ///
   /// [onError] - Callback function on error.
+  ///
   /// [deleteToken] - Delete token received in the email.
+  ///
 
-  Future<dynamic> deleteAccount({
+  Future<dynamic> deleteAccountByToken({
     required String deleteToken,
     required Function? Function(dynamic) onSuccess,
     required Function? Function(LRError) onError,
   }) async {
-    debugPrint("Delete Account");
+    debugPrint("Delete Account By Token");
     await _apiClient.get(
       '/identity/v2/auth/account/delete',
       params: {'apikey': _apiKey, 'deletetoken ': deleteToken},
@@ -327,10 +453,14 @@ class LoginRadiusSDK {
     );
   }
 
-  /// This method checks if the email exists or not on your site..
+  /// This method checks if the email exists or not on your site.
+  ///
   /// [onSuccess] - Callback function on success.
+  ///
   /// [onError] - Callback function on error.
+  ///
   /// [email] - Email of the user.
+  ///
 
   Future<dynamic> checkEmailExists({
     required String email,
@@ -347,9 +477,13 @@ class LoginRadiusSDK {
   }
 
   /// This method checks if the username exists or not on your site.
+  ///
   /// [onSuccess] - Callback function on success.
+  ///
   /// [onError] - Callback function on error.
+  ///
   /// [username] - Username of the user.
+  ///
 
   Future<dynamic> checkusernameExists({
     required String username,
@@ -366,9 +500,13 @@ class LoginRadiusSDK {
   }
 
   /// This method updates the privacy policy stored in the user's profile by providing the access_token of the user accepting the privacy policy.
+  ///
   /// [onSuccess] - Callback function on success.
+  ///
   /// [onError] - Callback function on error.
+  ///
   /// [accessToken] - Access Token of the User.
+  ///
 
   Future<dynamic> acceptPrivacyPolicy({
     required String accessToken,
@@ -386,9 +524,13 @@ class LoginRadiusSDK {
   }
 
   /// This method will return all the accepted privacy policies for the user by providing the access_token of that user.
+  ///
   /// [onSuccess] - Callback function on success.
+  ///
   /// [onError] - Callback function on error.
+  ///
   /// [accessToken] - Access Token of the User.
+  ///
 
   Future<dynamic> getPrivacyPolicyHistoryByAccessToken({
     required String accessToken,
@@ -406,10 +548,15 @@ class LoginRadiusSDK {
   }
 
   /// This method sends a welcome email to the user.
+  ///
   /// [onSuccess] - Callback function on success.
+  ///
   /// [onError] - Callback function on error.
+  ///
   /// [accessToken] - Access Token of the User.
+  ///
   /// [welcomeEmailTemplate] - Email Template to be used for sending the email.
+  ///
 
   Future<dynamic> sendWelcomeEmail({
     required String accessToken,
@@ -428,9 +575,13 @@ class LoginRadiusSDK {
   }
 
   /// This method is used to retrieve the list of questions that are configured on the respective LoginRadius site.
+  ///
   /// [onSuccess] - Callback function on success.
+  ///
   /// [onError] - Callback function on error.
+  ///
   /// [accessToken] - Access Token of the User.
+  ///
 
   Future<dynamic> getSecurityQuestionByAccessToken({
     required String accessToken,
@@ -448,9 +599,13 @@ class LoginRadiusSDK {
   }
 
   /// This method is used to retrieve the list of questions that are configured on the respective LoginRadius site.
+  ///
   /// [onSuccess] - Callback function on success.
+  ///
   /// [onError] - Callback function on error.
+  ///
   /// [email] - Email of the User.
+  ///
 
   Future<dynamic> getSecurityQuestionByEmail({
     required String email,
@@ -467,9 +622,13 @@ class LoginRadiusSDK {
   }
 
   /// This method is used to retrieve the list of questions that are configured on the respective LoginRadius site.
+  ///
   /// [onSuccess] - Callback function on success.
+  ///
   /// [onError] - Callback function on error.
+  ///
   /// [username] - Username of the User.
+  ///
 
   Future<dynamic> getSecurityQuestionByUsername({
     required String username,
@@ -486,9 +645,13 @@ class LoginRadiusSDK {
   }
 
   /// This method is used to retrieve the list of questions that are configured on the respective LoginRadius site.
+  ///
   /// [onSuccess] - Callback function on success.
+  ///
   /// [onError] - Callback function on error.
+  ///
   /// [phone] - Phone number of the User.
+  ///
 
   Future<dynamic> getSecurityQuestionByPhoneNumber({
     required String phoneNumber,
@@ -506,14 +669,377 @@ class LoginRadiusSDK {
 
   //<--PUT REQUESTS-->
 
-  /// Updates the user's profile by passing the access_token.
+  /// This method is used to verify the email of user when the OTP Email verification flow is enabled, please note that you must contact LoginRadius to have this feature enabled.
+  ///
   /// [onSuccess] - Callback function on success
+  ///
   /// [onError] - Callback function on error
-  /// [accessToken] - Access Token of the User
-  /// [data] - User profile data
+  ///
+  /// [data] - User data object. ('email' and 'otp' required).
+  ///
+  /// [welcomeEmailTemplate] - Email template name
+  ///
+  ///[url] - Mention URL to log the main URL(Domain name) in Database.
+
+  Future<dynamic> verifyEmailByOTP({
+    required Map<String, dynamic> data,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+    String? welcomeEmailTemplate,
+    String? url,
+  }) async {
+    debugPrint("Verify Email with OTP");
+    await _apiClient.put(
+      '/identity/v2/auth/email',
+      data: data,
+      params: {
+        'apikey': _apiKey,
+        'url': url,
+        'welcomeemailtemplate': welcomeEmailTemplate,
+      },
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// This method is used to change the accounts password based on the previous password.
+  ///
+  /// [accessToken] - Access Token of the User.
+  ///
+  /// [oldPassword] - Current Password of the User.
+  ///
+  /// [newPassword] - New Password of the User.
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+
+  Future<dynamic> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String accessToken,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+  }) async {
+    debugPrint("Auth Change Passsword");
+    await _apiClient.put(
+      '/identity/v2/auth/password/change',
+      data: {
+        'oldpassword': oldPassword,
+        'newpassword': newPassword,
+      },
+      params: {
+        'apikey': _apiKey,
+      },
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// This method resends the verification email to the user.
+  ///
+  /// [email] - Email of the User.
+  ///
   /// [emailTemplate] - Email template name
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+
+  Future<dynamic> resendMailVerification({
+    required String email,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+    String? emailTemplate,
+  }) async {
+    debugPrint("Auth Resend Email Verification");
+    await _apiClient.put(
+      '/identity/v2/auth/register',
+      data: {'email': email},
+      params: {
+        'apikey': _apiKey,
+        'verificationurl': _verificationUrl,
+        'emailtemplate': emailTemplate,
+      },
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// This method is used to set a new password for the specified account.
+  ///
+  /// [resetToken] - Reset token received in the email
+  ///
+  /// [password] - New password for the account
+  ///
+  /// [welcomeEmailTemplate] - Email template name
+  ///
+  /// [resetPasswordEmailTemplate] - Reset password email template name
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+
+  Future<dynamic> resetPasswordByToken({
+    required String? resetToken,
+    required String? newPassword,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+    String? welcomeEmailTemplate,
+    String? resetPasswordEmailTemplate,
+  }) async {
+    debugPrint("Auth Reset Password by Reset Token");
+    await _apiClient.put(
+      '/identity/v2/auth/password/reset',
+      data: {
+        'resettoken': resetToken,
+        'password': newPassword,
+        'welcomeemailtemplate': welcomeEmailTemplate,
+        "resetpasswordemailtemplate": resetPasswordEmailTemplate,
+      },
+      params: {'apikey': _apiKey},
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// This method is used to set a new password for the specified account.
+  ///
+  /// [email] - User's Email.
+  ///
+  /// [otp] - One-time passcode sent to user's Email
+  ///
+  /// [password] - New password for the account
+  ///
+  /// [welcomeEmailTemplate] - Email template name
+  ///
+  /// [resetPasswordEmailTemplate] - Reset password email template name
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+  //TODO: Issue with the API, requesting for resettoken when it isn't specified in the API.
+  Future<dynamic> resetPasswordByOTP({
+    required String? email,
+    required String? otp,
+    required String? newPassword,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+    String? welcomeEmailTemplate,
+    String? resetPasswordEmailTemplate,
+  }) async {
+    debugPrint("Auth Reset Password by OTP");
+    await _apiClient.put(
+      '/identity/v2/auth/password/reset',
+      data: {
+        'Otp': otp,
+        'Email': email,
+        'password': newPassword,
+        'welcomeemailtemplate': welcomeEmailTemplate,
+        "resetpasswordemailtemplate": resetPasswordEmailTemplate,
+      },
+      params: {'apikey': _apiKey},
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// This method is used to reset password for the specified account by security question.
+  ///
+  /// [email] - User's Email.
+  ///
+  /// [securityAnswer] - Valid JSON object of Unique Security Question ID and Answer of set Security Question
+  ///
+  /// [password] - New password for the account
+  ///
+  /// [resetPasswordEmailTemplate] - Reset password email template name
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+
+  Future<dynamic> resetPasswordBySecurityAnswerandEmail({
+    required String? email,
+    required String? newPassword,
+    required Map<String, dynamic>? securityAnswer,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+    String? resetPasswordEmailTemplate,
+  }) async {
+    debugPrint("Auth Reset Password by Security Answer and Email");
+    await _apiClient.put(
+      '/identity/v2/auth/password/securityanswer',
+      data: {
+        'email': email,
+        'password': newPassword,
+        'securityanswer': securityAnswer,
+        "resetpasswordemailtemplate": resetPasswordEmailTemplate,
+      },
+      params: {'apikey': _apiKey},
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// This method is used to reset password for the specified account by security question.
+  ///
+  /// [phone] - User's phone number.
+  ///
+  /// [securityAnswer] - Valid JSON object of Unique Security Question ID and Answer of set Security Question
+  ///
+  /// [password] - New password for the account
+  ///
+  /// [resetPasswordEmailTemplate] - Reset password email template name
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+
+  Future<dynamic> resetPasswordBySecurityAnswerandPhone({
+    required String? phone,
+    required String? newPassword,
+    required Map<String, dynamic>? securityAnswer,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+    String? resetPasswordEmailTemplate,
+  }) async {
+    debugPrint("Auth Reset Password by Security Answer and Phone");
+    await _apiClient.put(
+      '/identity/v2/auth/password/securityanswer',
+      data: {
+        'phone': phone,
+        'password': newPassword,
+        'securityanswer': securityAnswer,
+        "resetpasswordemailtemplate": resetPasswordEmailTemplate,
+      },
+      params: {'apikey': _apiKey},
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// This method is used to reset password for the specified account by security question.
+  ///
+  /// [username] - User's username.
+  ///
+  /// [securityAnswer] - Valid JSON object of Unique Security Question ID and Answer of set Security Question
+  ///
+  /// [password] - New password for the account
+  ///
+  /// [resetPasswordEmailTemplate] - Reset password email template name
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+
+  Future<dynamic> resetPasswordBySecurityAnswerandUsername({
+    required String? username,
+    required String? newPassword,
+    required Map<String, dynamic>? securityAnswer,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+    String? resetPasswordEmailTemplate,
+  }) async {
+    debugPrint("Auth Reset Password by Security Answer and Username");
+    await _apiClient.put(
+      '/identity/v2/auth/password/securityanswer',
+      data: {
+        'username': username,
+        'password': newPassword,
+        'securityanswer': securityAnswer,
+        "resetpasswordemailtemplate": resetPasswordEmailTemplate,
+      },
+      params: {'apikey': _apiKey},
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// This method  is used to set a new password for the specified account if you are using the username as the unique identifier in your workflow.
+  ///
+  /// [username] - User's username.
+  ///
+  /// [otp] - One-time passcode sent to user's Email
+  ///
+  /// [password] - New password for the account
+  ///
+  /// [welcomeEmailTemplate] - Email template name
+  ///
+  /// [resetPasswordEmailTemplate] - Reset password email template name
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+  //TODO: Issue with the API, requesting for resettoken when it isn't specified in the API.
+  Future<dynamic> resetPasswordByOTPandUsername({
+    required String? username,
+    required String? otp,
+    required String? newPassword,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+    String? welcomeEmailTemplate,
+    String? resetPasswordEmailTemplate,
+  }) async {
+    debugPrint("Auth Reset Password by OTP and Username");
+    await _apiClient.put(
+      '/identity/v2/auth/password/reset',
+      data: {
+        'Otp': otp,
+        'Username': username,
+        'password': newPassword,
+        'welcomeemailtemplate': welcomeEmailTemplate,
+        "resetpasswordemailtemplate": resetPasswordEmailTemplate,
+      },
+      params: {'apikey': _apiKey},
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// This method is used to set or change UserName by access token.
+  ///
+  /// [accessToken] - Access Token of the User
+  ///
+  /// [username] - New username for the account
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+  ///
+
+  Future<dynamic> setOrChangeUsername({
+    required String? accessToken,
+    required String? username,
+    required Function? Function(dynamic) onSuccess,
+    required Function? Function(LRError) onError,
+  }) async {
+    debugPrint("Auth Set or Change UserName");
+    await _apiClient.put(
+      '/identity/v2/auth/username',
+      accessToken: accessToken,
+      data: {'username': username},
+      params: {'apikey': _apiKey},
+      onSuccess: (data) => onSuccess(data),
+      onError: (error) => onError(error),
+    );
+  }
+
+  /// This method updates the user's profile by passing the access_token.
+  ///
+  /// [accessToken] - Access Token of the User
+  ///
+  /// [data] - User profile data
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+  ///
+  /// [emailTemplate] - Email template name
+  ///
   /// [smsTemplate] - SMS template name
+  ///
   /// [nullSupport] - Nullify the user's profile
+  ///
 
   Future<dynamic> updateUserProfileWithToken({
     required String accessToken,
@@ -541,15 +1067,20 @@ class LoginRadiusSDK {
     );
   }
 
-  /// Update security questions by the access token.
-  /// [onSuccess] - Callback function on success
-  /// [onError] - Callback function on error
+  /// This method is used to update security questions by the access token.
+  ///
   /// [accessToken] - Access Token of the User
-  /// [data] - Valid JSON object of Unique Security Question ID and Answer of set Security Question
+  ///
+  /// [securityQuestionAnswer] - Valid JSON object of Unique Security Question ID and Answer of set Security Question
+  ///
+  /// [onSuccess] - Callback function on success
+  ///
+  /// [onError] - Callback function on error
+  ///
 
   Future<dynamic> updateSecurityQuestionByAccessToken({
     required String accessToken,
-    required Map<String, dynamic> data,
+    required Map<String, dynamic> securityQuestionAnswer,
     required Function? Function(dynamic) onSuccess,
     required Function? Function(LRError) onError,
   }) async {
@@ -557,7 +1088,7 @@ class LoginRadiusSDK {
     await _apiClient.put(
       '/identity/v2/auth/account',
       accessToken: accessToken,
-      data: data,
+      data: {'securityquestionanswer': securityQuestionAnswer},
       params: {'apikey': _apiKey},
       onSuccess: (data) => onSuccess(data),
       onError: (error) => onError(error),
