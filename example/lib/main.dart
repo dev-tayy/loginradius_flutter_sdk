@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:loginradius_sdk/loginradius_sdk.dart';
 
 void main() {
-  LoginRadiusSDK _loginRadius = LoginRadiusSDK.instance;
-  _loginRadius.init(
+  LoginRadiusSDK.instance.init(
     apiKey: API_KEY,
     appName: APP_NAME,
     resetPasswordUrl: RESET_PASSWORD_URL,
@@ -42,14 +41,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final int _counter = 0;
 
-  final LoginRadiusSDK _loginRadius = LoginRadiusSDK.instance;
+  final LRAuthenticationApi _auth = LRAuthenticationApi();
 
   void _incrementCounter() async {
     //LOGIN USERS
 
     late String accessToken;
 
-    await _loginRadius.signInWithEmailAndPassword(
+    await _auth.signInWithEmailAndPassword(
         data: {
           'email': 'email@email.com',
           'password': 'P@ssword12345',
@@ -65,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Future.delayed(const Duration(seconds: 3), () {});
 
     // // REGISTER USERS
-    // _loginRadius.registerbyEmail(
+    // _auth.registerbyEmail(
     //     data: {
     //       'email': [
     //         {'type': 'Primary', 'value': 'email@email.com'}
@@ -81,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     //GET USER PROFILE DETAILS
 
-    _loginRadius.getUserProfileData(
+    _auth.getUserProfileData(
         accessToken: accessToken,
         onSuccess: (data) {
           debugPrint('GET USER PROFILE DATA $data');
@@ -93,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Future.delayed(const Duration(seconds: 3), () {});
     //INVALIDATE ACCESS TOKEN/LOG OUT
 
-    _loginRadius.invalidateAccessToken(
+    _auth.invalidateAccessToken(
         accessToken: accessToken,
         onSuccess: (data) {
           debugPrint('INVALIDATE ACCESS TOKEN $data');
