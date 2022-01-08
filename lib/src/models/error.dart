@@ -56,6 +56,6 @@ class LRError {
         "Message": message,
         "IsProviderError": isProviderError,
         "ProviderErrorResponse": providerErrorResponse,
-      //  "Errors": List<Error>.from(errors!.map((x) => x.toJson())),
+        //  "Errors": List<Error>.from(errors!.map((x) => x.toJson())),
       };
 }
