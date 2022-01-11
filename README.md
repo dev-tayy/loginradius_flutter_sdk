@@ -27,15 +27,120 @@ Please visit [here](http://www.loginradius.com/) for more information.
 a. example - This is the demo application.    
 b. lib -This is the LoginRadius SDK.
 
+> #### Disclaimer
+>This library is meant to help you with a quick implementation of the LoginRadius platform and also to serve as a reference point for the LoginRadius API. Keep in mind that it is an open source library, which means you are free to download and customize the library functions based on your specific application needs
 
-## Features
+## Initializing SDK
+In your `main` function, create an instance of the **LoginRadiusSDK** and call the `init` method on it, then populate it with the required data.
+```dart
+import 'package:loginradius_sdk/loginradius_sdk.dart'; //import the LoginRadius package
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+void main() {
+  LoginRadiusSDK _loginRadius = LoginRadiusSDK.instance;
 
-## Getting started
+  _loginRadius.init(
+    apiKey: YOUR_API_KEY,
+    appName: YOUR_APP_NAME,
+    resetPasswordUrl: YOUR_RESET_PASSWORD_URL,
+    verificationUrl: YOUR_VERIFICATION_URL,
+    sott: YOUR_SOTT,
+  );
+  
+  runApp(const MyApp());
+}
+```
+The above initialization requires options object with the following parameter:
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+| Name | Required | Description |
+| ---         |     ---     |  --- |
+| apiKey   | :heavy_check_mark:     | Set to your LoginRadius API Key which you can get [here](https://loginradius.readme.io/get-api-key-and-secret).    |
+| appName     | :heavy_check_mark:       | Set to your LoginRadius site name, this is required for User Registration to work with Single Sign On API.      |
+| sott   | :heavy_check_mark:     | Secure One-time Token. Get token from Admin Console Note: While generating SOTT from Loginradius [Admin Console](https://secure.loginradius.com/deployment/mobile-app), enable Encode SOTT.    |
+| verificationUrl     | :heavy_check_mark:       | Set dynamic URL for email verification (Default URL: https://auth.lrcontent.com/mobile/verification/index.html)      |
+| resetPasswordUrl   | :heavy_check_mark:     | Set dynamic URL for reset password.    |
+
+
+## LoginRadius API Showcase
+
+This section helps you to explore various API methods of LoginRadius Flutter SDK. They can be used to fulfill your identity based needs related to traditional login, registration and many more.
+
+## Authentication API
+This API is used to perform operations on a user account after the user has authenticated himself for the changes to be made. Generally, it is used for Frontend API calls. Following is the list of methods covered under this API:
+
+- Registration By Email
+- Login By Email
+- Login By Username
+- Accept Privacy Policy
+- Send Welcome Email
+- Read Complete User Profile
+- Get Social Identity
+- Link Social Account
+- Unlink Social Account
+- Update User Profile
+- Check Email Availability
+- Add Email
+- Verify Email
+- Verify Email By OTP
+- Remove Email
+- Resend Verification Email
+- Change Password
+- Forgot Password By Email
+- Validate Access Token
+- Invalidate Access Token
+- Get Security Questions By Email
+- Get Security Questions By Username
+- Get Security Questions By Access Token
+- Update Security Questions By Access Token
+- Login with Security Questions By Email
+- Login with Security Questions By Phone
+- Login with Security Questions By Username
+- Check Username Availability
+- Set or Change Username
+- Reset Password By Email OTP
+- Reset Password By Reset Token
+- Reset Password By Security Questions using Email
+- Reset Password By Security Questions using Username
+- Delete Account
+- Delete Account with Email confirmation
+
+## Register by Email
+
+This API creates a user in the database as well as sends a verification email to the user.
+
+In the following example, we initialized the LoginRadius Authentication class `LRAuthenticationApi`. This class exposes all methods relating to Authentication of Users.  Then we call the `signUpWithEmailandPassword` method on the instance of the class `_auth`. This method has 3 required parameters, which are as follows:
+
+| params | Description |
+| --- | --- |
+| `data` | User attributes. To view the complete list of user attributes, please have a look at the body parameters of the user registration API [here](https://www.loginradius.com/docs/api/v2/user-registration/auth-user-registration-by-email). |
+| `onSuccess` | Callback function on success |
+| `onError` | Callback function on error |
+
+```dart
+final LRAuthenticationApi _auth = LRAuthenticationApi();
+
+void createAccount() {
+    Map<String, dynamic> userData = {
+      "FirstName": "Test",
+      "LastName": "Account",
+      "FullName": "Test Account",
+      "BirthDate": "10-12-1985",
+      "Gender": "M",
+      "Email": [
+        {"Type": "Primary", "Value": "example@example.com"}
+      ],
+      "Password": "******"
+    };
+
+    _auth.signUpWithEmailAndPassword(
+        data: userData,
+        onSuccess: (data) {
+          debugPrint(data);
+        },
+        onError: (error) {
+          debugPrint(error.description);
+        });
+ }  
+```
 
 ## Usage
 
