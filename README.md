@@ -68,15 +68,17 @@ This section helps you to explore various API methods of LoginRadius Flutter SDK
 This API is used to perform operations on a user account after the user has authenticated himself for the changes to be made. Generally, it is used for Frontend API calls. Following is the list of methods covered under this API:
 
 - Registration By Email
+- Registration By Phone
 - Login By Email
 - Login By Username
+- Read Complete User Profile
+- Update User Profile
 - Accept Privacy Policy
 - Send Welcome Email
-- Read Complete User Profile
 - Get Social Identity
 - Link Social Account
 - Unlink Social Account
-- Update User Profile
+- 
 - Check Email Availability
 - Add Email
 - Verify Email
@@ -105,7 +107,7 @@ This API is used to perform operations on a user account after the user has auth
 
 ## Register by Email
 
-This API creates a user in the database as well as sends a verification email to the user.
+This method creates a user in the database as well as sends a verification email to the user.
 
 In the following example, we initialized the LoginRadius Authentication class `LRAuthenticationApi`. This class exposes all methods relating to Authentication of Users.  Then we call the `signUpWithEmailandPassword` method on the instance of the class `_auth`. This method has 3 required parameters, which are as follows:
 
@@ -141,6 +143,117 @@ void createAccount() {
         });
  }  
 ```
+
+## Login by Email
+
+This method retrieves a copy of the user data based on the email.
+
+```dart
+  final LRAuthenticationApi _auth = LRAuthenticationApi();
+
+  void loginbyEmail() async {
+    late String accessToken;
+
+    await _auth.signInWithEmailAndPassword(
+       email: 'example@example.com',
+       password: '********',
+        onSuccess: (data) {
+          accessToken = data['access_token'];
+        },
+        onError: (error) {
+          debugPrint(error.description);
+        });
+  } 
+```
+
+## Login by Username
+
+This method retrieves a copy of the user data based on the username.
+
+```dart
+final LRAuthenticationApi _auth = LRAuthenticationApi();
+
+  void loginbyUsername() async {
+    late String accessToken;
+    await _auth.signInWithUsernameAndPassword(
+       username: 'jackandjill',
+       password: '********',
+        onSuccess: (data) {
+          accessToken = data['access_token'];
+        },
+        onError: (error) {
+          debugPrint(error.description);
+        });
+  } 
+```
+
+## Read Complete User Profile
+
+This method retrieves a copy of the user data based on the access token.
+
+```dart
+ final LRAuthenticationApi _auth = LRAuthenticationApi();
+
+  void getUserProfile() async {
+    String accessToken = '<your_access_token>'; // your access token
+
+    _auth.getUserProfileData(
+        accessToken: accessToken,
+        onSuccess: (data) {
+          debugPrint('GET USER PROFILE DATA $data');
+        },
+        onError: (error) {
+          debugPrint(error.description);
+        });
+  } 
+```
+
+## Link Social Account
+
+This method is used to link up a social provider account with the specified account based on the access token and the social providers user access token.
+
+```dart
+ final LRAuthenticationApi _auth = LRAuthenticationApi();
+
+ String accessToken = 'your_access_token'; // Required
+ String candidateToken = 'your_candidate_token'; // Required
+
+ await _auth.linkSocialIdentity(
+   candidateToken: candidateToken,
+   accessToken: accessToken,
+   onSuccess: (data) {
+        debugPrint(data);
+   },
+   onError: (error) {
+        debugPrint(error.description);
+   });
+  } 
+```
+
+## Unlink Social Account
+
+This method is used to unlink up a social provider account with the specified account based on the access token and the social providers user access token. The unlinked account will automatically get removed from your database.
+
+```dart
+ final LRAuthenticationApi _auth = LRAuthenticationApi();
+
+ String accessToken = 'your_access_token'; // Required
+ String provider = '<provider_name>'; // Required
+ String providerId = '<your_provider_id>'; // Required
+
+ await _auth.unlinkSocialIdentities(
+        provider: provider,
+        providerId: providerId,
+        accessToken: accessToken,
+        onSuccess: (data) {
+          debugPrint(data);
+        },
+        onError: (error) {
+          debugPrint(error.description);
+        });
+  } 
+```
+
 
 ## Usage
 
